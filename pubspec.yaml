@@ -1,0 +1,23 @@
+name: parse_sync
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+  flutter: ^3.24.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  parse_server_sdk: ^8.0.0
+  sembast: ^3.8.4
+  shared_preferences: ^2.5.2
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.4.0
+  very_good_analysis: ^6.0.0
