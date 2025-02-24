@@ -67,4 +67,29 @@ class SyncEntity<T extends ParseObject> {
       isDeleted: map['isDeleted'] as bool? ?? false,
     );
   }
+
+  /// Creates a copy of the current [SyncEntity] instance with updated fields.
+  ///
+  /// If a parameter is not provided, the existing value
+  /// from the current instance is used.
+  /// - [objectId]: The unique identifier of the object.
+  /// - [object]: The ParseObject being synchronized.
+  /// - [isDirty]: Indicates if there are unsynchronized changes.
+  /// - [localUpdatedAt]: Timestamp of the last local update.
+  /// - [isDeleted]: Whether the object is marked as deleted.
+  SyncEntity<T> copyWith({
+    String? objectId,
+    T? object,
+    bool? isDirty,
+    DateTime? localUpdatedAt,
+    bool? isDeleted,
+  }) {
+    return SyncEntity<T>(
+      objectId: objectId ?? this.objectId,
+      object: object ?? this.object,
+      isDirty: isDirty ?? this.isDirty,
+      localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
+  }
 }
