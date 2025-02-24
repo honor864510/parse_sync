@@ -19,12 +19,30 @@ class SyncLocalDataSource<T extends ParseObject> {
     await _store.record(objectId).delete(database);
   }
 
-  Stream<List<SyncEntity<T>>> watchAll() {
-    return _store.query().onSnapshots(database).map((records) => records
+  Stream<List<SyncEntity<T>>> watchAll([Finder? finder]) {
+    return _store.query(finder: finder).onSnapshots(database).map(
+          (
+            records,
+          ) =>
+              records
+                  .map(
+                    (r) => SyncEntity<T>.fromMap(r.value),
+                  )
+                  .toList(),
+        );
+  }
+
+  Future<List<SyncEntity<T>>> fetchAll([Finder? finder]) async {
+    final values = await _store.query(finder: finder).getSnapshots(database);
+
+    return values
         .map(
-          (r) => SyncEntity<T>.fromMap(r.value),
+          (
+            record,
+          ) =>
+              SyncEntity<T>.fromMap(record.value),
         )
-        .toList());
+        .toList();
   }
 
   Future<SyncEntity<T>?> getEntity(String objectId) async {

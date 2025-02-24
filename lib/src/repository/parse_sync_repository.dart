@@ -4,6 +4,7 @@ import 'package:parse_sync/src/data_source/sync_preferences.dart';
 import 'package:parse_sync/src/data_source/sync_remote_data_source.dart';
 import 'package:parse_sync/src/entity/sync_entity.dart';
 import 'package:parse_sync/src/utils/sync_conflict_handler.dart';
+import 'package:sembast/sembast_io.dart';
 import 'package:uuid/uuid.dart';
 
 class ParseSyncRepository<T extends ParseObject> {
@@ -23,36 +24,43 @@ class ParseSyncRepository<T extends ParseObject> {
         _conflictHandler = conflictHandler,
         _preferences = preferences;
 
-  Future<void> pullFromServer() async {
-    final serverObjects = await _remoteDataSource.pullFromServer(
+  Future<void> pullFromServer({required QueryBuilder query}) async {
+    final now = DateTime.now();
+
+    final serverObjects = await _remoteDataSource.fetchObjects(
       _preferences.lastSync,
+      query,
     );
 
-    await _localDataSource.database.transaction((txn) async {
-      for (final serverObj in serverObjects) {
-        final local = await _localDataSource.getEntity(serverObj.objectId!);
-        if (local == null || !local.isDirty) {
-          await _localDataSource.putEntity(SyncEntity(
-            objectId: serverObj.objectId!,
-            object: serverObj,
-            localUpdatedAt: DateTime.now(),
-          ));
+    await _localDataSource.database.transaction(
+      (txn) async {
+        for (final serverObj in serverObjects) {
+          final local = await _localDataSource.getEntity(serverObj.objectId!);
+          if (local == null || !local.isDirty) {
+            await _localDataSource.putEntity(
+              SyncEntity(
+                objectId: serverObj.objectId!,
+                object: serverObj,
+                localUpdatedAt: now,
+              ),
+            );
+          }
         }
-      }
-    });
+      },
+    );
 
-    await _preferences.setLastSync(DateTime.now());
+    await _preferences.setLastSync(now);
   }
 
   Future<void> pushToServer() async {
-    final entities = await _localDataSource.watchAll().first.then(
-          (list) => list.where(
-            (e) => e.isDirty,
-          ),
-        );
+    final entities = await _localDataSource.fetchAll(
+      Finder(
+        filter: Filter.equals('isDirty', true),
+      ),
+    );
 
     for (final entity in entities) {
-      final response = await _remoteDataSource.pushToServer(entity);
+      final response = await _remoteDataSource.saveToServer(entity);
 
       if (response.success) {
         await _handleSuccessfulPush(entity, response.results!.firstOrNull! as T);
@@ -75,12 +83,13 @@ class ParseSyncRepository<T extends ParseObject> {
   }
 
   Future<void> _handleConflict(SyncEntity<T> entity) async {
-    final serverResponse = await _remoteDataSource.getObject(entity.objectId);
-    if (serverResponse.success) {
+    final remoteObject = await _remoteDataSource.fetchObject(entity.objectId);
+    if (remoteObject != null) {
       final resolved = _conflictHandler.resolve(
         entity,
-        serverResponse.results!.firstOrNull as T,
+        remoteObject,
       );
+
       await _localDataSource.putEntity(resolved);
     }
   }
@@ -88,12 +97,14 @@ class ParseSyncRepository<T extends ParseObject> {
   Future<String> saveLocally(T object) {
     final objectId = object.objectId ?? 'CLIENT_${_uuid.v4()}';
     return _localDataSource
-        .putEntity(SyncEntity(
-          objectId: objectId,
-          object: object..objectId = objectId,
-          isDirty: true,
-          localUpdatedAt: DateTime.now(),
-        ))
+        .putEntity(
+          SyncEntity(
+            objectId: objectId,
+            object: object..objectId = objectId,
+            isDirty: true,
+            localUpdatedAt: DateTime.now(),
+          ),
+        )
         .then((_) => objectId);
   }
 }

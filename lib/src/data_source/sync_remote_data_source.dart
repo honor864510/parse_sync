@@ -8,27 +8,36 @@ class SyncRemoteDataSource<T extends ParseObject> {
     this._objectConstructor,
   );
 
-  Future<ParseResponse> getObject(String objectId) {
-    return _objectConstructor().getObject(
+  Future<T?> fetchObject(String objectId) async {
+    final response = await _objectConstructor().getObject(
       objectId,
     );
+
+    final result = response.results?.firstOrNull as T?;
+
+    return result;
   }
 
-  Future<List<T>> pullFromServer(DateTime lastSync) async {
-    final query = QueryBuilder<T>(_objectConstructor() as T)
+  Future<List<T>> fetchObjects(DateTime lastSync, QueryBuilder query) async {
+    final querySync = QueryBuilder<T>(_objectConstructor() as T)
       ..whereGreaterThan(
         keyVarUpdatedAt,
         lastSync,
       );
 
-    final response = await query.query();
+    final response = await QueryBuilder.and(
+      _objectConstructor(),
+      [query, querySync],
+    ).query();
+
     return response.results?.cast<T>() ?? [];
   }
 
-  Future<ParseResponse> pushToServer(SyncEntity<T> entity) async {
+  Future<ParseResponse> saveToServer(SyncEntity<T> entity) async {
     if (entity.isDeleted) {
       return entity.object.delete();
     }
+
     return entity.object.save();
   }
 }
