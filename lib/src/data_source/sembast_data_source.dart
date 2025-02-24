@@ -116,12 +116,11 @@ class SyncLocalDataSource<T extends ParseObject> {
     return record != null ? SyncEntity<T>.fromMap(record) : null;
   }
 
-  /// Clears all data from the local storage
-  ///
-  /// Removes all records from the underlying store.
+  /// Permanently deletes all entities from the local storage.
   ///
   /// Throws:
-  /// - [DatabaseException] if operation fails
+  /// - [DatabaseException] if the operation fails
+  ///
   Future<void> clear() async {
     await _store.delete(database);
   }

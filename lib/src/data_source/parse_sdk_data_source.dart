@@ -1,6 +1,6 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
 import 'package:parse_sync/src/entity/sync_entity.dart';
-import 'package:parse_sync/src/utils/parse_sdk_exception.dart';
+import 'package:parse_sync/src/utils/exceptions.dart';
 
 /// Data source for interacting with Parse server operations
 /// for a specific [ParseObject] type.
