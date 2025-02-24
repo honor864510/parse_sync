@@ -35,7 +35,7 @@ class ParseSyncRepository<T extends ParseObject> {
     await _localDataSource.database.transaction(
       (txn) async {
         for (final serverObj in serverObjects) {
-          final local = await _localDataSource.getEntity(serverObj.objectId!);
+          final local = await _localDataSource.fetchEntity(serverObj.objectId!);
           if (local == null || !local.isDirty) {
             await _localDataSource.putEntity(
               SyncEntity(

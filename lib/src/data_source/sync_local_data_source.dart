@@ -45,7 +45,7 @@ class SyncLocalDataSource<T extends ParseObject> {
         .toList();
   }
 
-  Future<SyncEntity<T>?> getEntity(String objectId) async {
+  Future<SyncEntity<T>?> fetchEntity(String objectId) async {
     final record = await _store.record(objectId).get(database);
     return record != null ? SyncEntity.fromMap(record) : null;
   }

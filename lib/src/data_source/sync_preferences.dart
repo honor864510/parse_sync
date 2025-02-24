@@ -30,9 +30,11 @@ class SyncPreferences {
   ///
   /// Returns [DateTime] representing the most recent successful sync time.
   /// Returns [defaultLastSync] if no sync has ever been recorded.
-  DateTime get lastSync => DateTime.fromMillisecondsSinceEpoch(
-        _prefs.getInt(_prefsKey) ?? defaultLastSync.millisecondsSinceEpoch,
-      );
+  DateTime get lastSync => _prefs.getInt(_prefsKey) != null
+      ? DateTime.fromMillisecondsSinceEpoch(
+          _prefs.getInt(_prefsKey)!,
+        ).toUtc()
+      : defaultLastSync;
 
   /// Updates the last successful synchronization timestamp
   ///

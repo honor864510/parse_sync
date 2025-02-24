@@ -97,7 +97,10 @@ void main() {
 
     test('defaultLastSync is Unix epoch', () {
       // Validate static default value matches expected Unix epoch
-      expect(SyncPreferences.defaultLastSync, DateTime.fromMillisecondsSinceEpoch(0));
+      expect(
+        SyncPreferences.defaultLastSync,
+        DateTime.fromMillisecondsSinceEpoch(0).toUtc(),
+      );
       expect(SyncPreferences.defaultLastSync.millisecondsSinceEpoch, 0);
     });
 
