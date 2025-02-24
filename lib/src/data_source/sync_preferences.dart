@@ -40,7 +40,7 @@ class SyncPreferences {
   ///
   /// [time]: The exact moment when the last successful sync completed
   Future<void> setLastSync(DateTime time) async {
-    await _prefs.setInt(_prefsKey, time.millisecondsSinceEpoch);
+    await _prefs.setInt(_prefsKey, time.toUtc().millisecondsSinceEpoch);
   }
 
   /// Internal key format for SharedPreferences storage

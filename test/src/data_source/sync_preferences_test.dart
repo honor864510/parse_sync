@@ -20,7 +20,10 @@ void main() {
         collectionName: 'users',
       );
 
-      expect(syncPrefs.lastSync, DateTime.fromMillisecondsSinceEpoch(0));
+      expect(
+        syncPrefs.lastSync,
+        DateTime.fromMillisecondsSinceEpoch(0).toUtc(),
+      );
     });
 
     test('setLastSync stores and retrieves correct timestamp', () async {
@@ -29,11 +32,14 @@ void main() {
         collectionName: 'posts',
       );
 
-      final testTime = DateTime(2023, 1, 1, 12, 30);
+      final testTime = DateTime(2023, 1, 1, 12, 30).toUtc();
       await syncPrefs.setLastSync(testTime);
 
       expect(syncPrefs.lastSync, testTime);
-      expect(prefs!.getInt('lastSync_posts'), testTime.millisecondsSinceEpoch);
+      expect(
+        prefs!.getInt('lastSync_posts'),
+        testTime.millisecondsSinceEpoch,
+      );
     });
 
     test('prefs key uses correct naming convention', () async {
@@ -43,7 +49,7 @@ void main() {
         collectionName: collection,
       );
 
-      final testTime = DateTime.now();
+      final testTime = DateTime.now().toUtc();
       await syncPrefs.setLastSync(testTime);
 
       expect(prefs!.containsKey('lastSync_$collection'), true);
@@ -64,7 +70,7 @@ void main() {
         collectionName: 'orders',
       );
 
-      final testTime = DateTime(2023, 2, 1, 9, 15);
+      final testTime = DateTime(2023, 2, 1, 9, 15).toUtc();
       await usersPrefs.setLastSync(testTime);
 
       // Verify users collection has the timestamp
@@ -72,7 +78,10 @@ void main() {
       expect(prefs!.getInt('lastSync_users'), testTime.millisecondsSinceEpoch);
 
       // Verify orders collection remains at epoch
-      expect(ordersPrefs.lastSync, DateTime.fromMillisecondsSinceEpoch(0));
+      expect(
+        ordersPrefs.lastSync,
+        DateTime.fromMillisecondsSinceEpoch(0).toUtc(),
+      );
       expect(prefs!.containsKey('lastSync_orders'), false);
     });
 
@@ -88,10 +97,10 @@ void main() {
       final updatedTime = DateTime(2023, 3, 2);
       await syncPrefs.setLastSync(updatedTime);
 
-      expect(syncPrefs.lastSync, updatedTime);
+      expect(syncPrefs.lastSync, updatedTime.toUtc());
       expect(
         prefs!.getInt('lastSync_inventory'),
-        updatedTime.millisecondsSinceEpoch,
+        updatedTime.toUtc().millisecondsSinceEpoch,
       );
     });
 
@@ -136,7 +145,11 @@ void main() {
       expect(syncPrefs.lastSync, SyncPreferences.defaultLastSync);
 
       // Set to non-default and verify difference
-      final testTime = DateTime.now().subtract(const Duration(hours: 1));
+      final testTime = DateTime.now()
+          .subtract(
+            const Duration(hours: 1),
+          )
+          .toUtc();
       await syncPrefs.setLastSync(testTime);
       expect(syncPrefs.lastSync, isNot(SyncPreferences.defaultLastSync));
     });
