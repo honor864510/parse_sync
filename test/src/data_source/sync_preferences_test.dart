@@ -82,7 +82,7 @@ void main() {
         collectionName: 'inventory',
       );
 
-      final initialTime = DateTime(2023, 3, 1);
+      final initialTime = DateTime(2023, 3);
       await syncPrefs.setLastSync(initialTime);
 
       final updatedTime = DateTime(2023, 3, 2);
@@ -93,6 +93,55 @@ void main() {
         prefs!.getInt('lastSync_inventory'),
         updatedTime.millisecondsSinceEpoch,
       );
+    });
+
+    test('defaultLastSync is Unix epoch', () {
+      // Validate static default value matches expected Unix epoch
+      expect(SyncPreferences.defaultLastSync, DateTime.fromMillisecondsSinceEpoch(0));
+      expect(SyncPreferences.defaultLastSync.millisecondsSinceEpoch, 0);
+    });
+
+    test('explicit default comparison in initial state', () {
+      final syncPrefs = SyncPreferences(
+        prefs: prefs!,
+        collectionName: 'emptyCollection',
+      );
+
+      // Directly compare with static default value
+      expect(syncPrefs.lastSync, SyncPreferences.defaultLastSync);
+    });
+
+    test('setting default value explicitly persists correctly', () async {
+      final syncPrefs = SyncPreferences(
+        prefs: prefs!,
+        collectionName: 'explicitDefault',
+      );
+
+      // Set to default and verify storage
+      await syncPrefs.setLastSync(SyncPreferences.defaultLastSync);
+      expect(prefs!.getInt('lastSync_explicitDefault'), 0);
+      expect(syncPrefs.lastSync, SyncPreferences.defaultLastSync);
+    });
+
+    test('modified timestamp differs from default', () async {
+      final syncPrefs = SyncPreferences(
+        prefs: prefs!,
+        collectionName: 'modified',
+      );
+
+      // Verify initial state is default
+      expect(syncPrefs.lastSync, SyncPreferences.defaultLastSync);
+
+      // Set to non-default and verify difference
+      final testTime = DateTime.now().subtract(const Duration(hours: 1));
+      await syncPrefs.setLastSync(testTime);
+      expect(syncPrefs.lastSync, isNot(SyncPreferences.defaultLastSync));
+    });
+
+    test('UTC consistency check', () {
+      // Verify default value uses UTC interpretation
+      expect(SyncPreferences.defaultLastSync.isUtc, true);
+      expect(SyncPreferences.defaultLastSync, DateTime.utc(1970));
     });
   });
 }

@@ -1,15 +1,10 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
-import '../data_source/sync_local_data_source.dart';
-import '../data_source/sync_preferences.dart';
-import '../data_source/sync_remote_data_source.dart';
-import '../entity/sync_entity.dart';
-import '../utils/sync_conflict_handler.dart';
+import 'package:parse_sync/src/data_source/sync_local_data_source.dart';
+import 'package:parse_sync/src/data_source/sync_preferences.dart';
+import 'package:parse_sync/src/data_source/sync_remote_data_source.dart';
+import 'package:parse_sync/src/entity/sync_entity.dart';
+import 'package:parse_sync/src/utils/sync_conflict_handler.dart';
 import 'package:uuid/uuid.dart';
-
-typedef ConflictResolver<T extends ParseObject> = SyncEntity<T> Function(
-  SyncEntity<T> localEntity,
-  T serverObject,
-);
 
 class ParseSyncRepository<T extends ParseObject> {
   final SyncLocalDataSource<T> _localDataSource;
@@ -50,7 +45,11 @@ class ParseSyncRepository<T extends ParseObject> {
   }
 
   Future<void> pushToServer() async {
-    final entities = await _localDataSource.watchAll().first.then((list) => list.where((e) => e.isDirty));
+    final entities = await _localDataSource.watchAll().first.then(
+          (list) => list.where(
+            (e) => e.isDirty,
+          ),
+        );
 
     for (final entity in entities) {
       final response = await _remoteDataSource.pushToServer(entity);

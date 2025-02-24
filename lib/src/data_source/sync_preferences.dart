@@ -21,12 +21,17 @@ class SyncPreferences {
   final SharedPreferences _prefs;
   final String _collectionName;
 
+  /// Default DateTime representing the Unix epoch (1970-01-01 UTC)
+  static DateTime get defaultLastSync => DateTime.fromMillisecondsSinceEpoch(
+        0,
+      ).toUtc();
+
   /// Retrieves the last successful synchronization timestamp
   ///
   /// Returns [DateTime] representing the most recent successful sync time.
-  /// Returns Unix epoch (1970-01-01 UTC) if no sync has ever been recorded.
+  /// Returns [defaultLastSync] if no sync has ever been recorded.
   DateTime get lastSync => DateTime.fromMillisecondsSinceEpoch(
-        _prefs.getInt(_prefsKey) ?? 0,
+        _prefs.getInt(_prefsKey) ?? defaultLastSync.millisecondsSinceEpoch,
       );
 
   /// Updates the last successful synchronization timestamp

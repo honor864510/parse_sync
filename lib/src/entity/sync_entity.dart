@@ -17,7 +17,7 @@ class SyncEntity<T extends ParseObject> {
 
   Map<String, dynamic> toMap() {
     return {
-      'objectId': objectId,
+      keyVarObjectId: objectId,
       'object': parseEncode(object),
       'isDirty': isDirty,
       'localUpdatedAt': localUpdatedAt.millisecondsSinceEpoch,
@@ -29,7 +29,7 @@ class SyncEntity<T extends ParseObject> {
     Map<String, dynamic> map,
   ) {
     return SyncEntity(
-      objectId: map['objectId'] as String,
+      objectId: map[keyVarObjectId] as String,
       object: parseDecode(map['object']) as T,
       isDirty: map['isDirty'] as bool,
       localUpdatedAt: DateTime.fromMillisecondsSinceEpoch(
