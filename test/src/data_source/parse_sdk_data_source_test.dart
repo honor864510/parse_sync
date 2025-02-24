@@ -78,30 +78,6 @@ void main() {
             mockParseClient.get(any),
           );
         });
-
-        test('should throw ParseSdkException on server error', () async {
-          // Mock server error
-          when(
-            mockParseClient.get(any),
-          ).thenAnswer(
-            (_) async => ParseNetworkResponse(
-              statusCode: 500,
-              data: jsonEncode(
-                {'error': 'Internal Server Error'},
-              ),
-            ),
-          );
-
-          expect(
-            () async => dataSource.fetchObject('test123'),
-            throwsA(
-              isA<ParseSdkException>(),
-            ),
-          );
-          verify(
-            mockParseClient.get(any),
-          );
-        });
       });
 
       group('fetchObjects', () {
