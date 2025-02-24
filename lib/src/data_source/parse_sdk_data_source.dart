@@ -36,16 +36,10 @@ class ParseSdkDataSource<T extends ParseObject> {
   /// - [T] if the object is found.
   /// - `null` if no object exists with the given ID.
   ///
-  /// Throws:
-  /// - [ParseSdkException] if the server request fails.
   Future<T?> fetchObject(String objectId) async {
     final response = await _objectConstructor().getObject(
       objectId,
     );
-
-    if (!response.success) {
-      throw ParseSdkException(error: response.error);
-    }
 
     final result = response.results?.firstOrNull as T?;
 
