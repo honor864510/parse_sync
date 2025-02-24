@@ -3,6 +3,13 @@ description: A Very Good Project created by Very Good CLI.
 version: 0.1.0+1
 publish_to: none
 
+topics:
+  - parse
+  - parse-platform
+  - parse-server
+  - node-js
+  - backend
+
 environment:
   sdk: ^3.5.0
   flutter: ^3.24.0
@@ -19,5 +26,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.4.9
   mockito: ^5.4.0
   very_good_analysis: ^6.0.0

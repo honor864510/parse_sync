@@ -1,21 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:parse_server_sdk/parse_server_sdk.dart';
 import 'package:parse_sync/src/data_source/sembast_data_source.dart';
 import 'package:parse_sync/src/entity/sync_entity.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_memory.dart' as sembast_memory;
 
+import '../../utils/test_utils.dart';
+import 'parse_sdk_data_source_test.mocks.dart';
+
+@GenerateMocks([ParseClient])
 void main() {
   group('SyncLocalDataSource', () {
     late Database database;
     late SyncLocalDataSource<ParseObject> dataSource;
 
     setUp(() async {
-      await Parse().initialize(
-        'appId',
-        'serverUrl',
-        coreStore: CoreStoreMemoryImp(),
-        clientKey: 'clientKey',
+      await initializeParse(
+        client: MockParseClient(),
       );
 
       database = await sembast_memory.databaseFactoryMemory.openDatabase(

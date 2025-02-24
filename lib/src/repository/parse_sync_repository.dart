@@ -1,7 +1,7 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
 import 'package:parse_sync/src/data_source/sembast_data_source.dart';
 import 'package:parse_sync/src/data_source/sync_preferences.dart';
-import 'package:parse_sync/src/data_source/sync_remote_data_source.dart';
+import 'package:parse_sync/src/data_source/parse_sdk_data_source.dart';
 import 'package:parse_sync/src/entity/sync_entity.dart';
 import 'package:parse_sync/src/utils/sync_conflict_handler.dart';
 import 'package:sembast/sembast_io.dart';
@@ -9,14 +9,14 @@ import 'package:uuid/uuid.dart';
 
 class ParseSyncRepository<T extends ParseObject> {
   final SyncLocalDataSource<T> _localDataSource;
-  final SyncRemoteDataSource<T> _remoteDataSource;
+  final ParseSdkDataSource<T> _remoteDataSource;
   final SyncConflictHandler<T> _conflictHandler;
   final SyncPreferences _preferences;
   final Uuid _uuid = const Uuid();
 
   ParseSyncRepository({
     required SyncLocalDataSource<T> localDataSource,
-    required SyncRemoteDataSource<T> remoteDataSource,
+    required ParseSdkDataSource<T> remoteDataSource,
     required SyncConflictHandler<T> conflictHandler,
     required SyncPreferences preferences,
   })  : _localDataSource = localDataSource,
