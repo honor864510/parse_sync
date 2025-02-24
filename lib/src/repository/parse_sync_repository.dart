@@ -1,5 +1,5 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
-import 'package:parse_sync/src/data_source/sync_local_data_source.dart';
+import 'package:parse_sync/src/data_source/sembast_data_source.dart';
 import 'package:parse_sync/src/data_source/sync_preferences.dart';
 import 'package:parse_sync/src/data_source/sync_remote_data_source.dart';
 import 'package:parse_sync/src/entity/sync_entity.dart';
@@ -35,9 +35,9 @@ class ParseSyncRepository<T extends ParseObject> {
     await _localDataSource.database.transaction(
       (txn) async {
         for (final serverObj in serverObjects) {
-          final local = await _localDataSource.fetchEntity(serverObj.objectId!);
+          final local = await _localDataSource.fetchOne(serverObj.objectId!);
           if (local == null || !local.isDirty) {
-            await _localDataSource.putEntity(
+            await _localDataSource.save(
               SyncEntity(
                 objectId: serverObj.objectId!,
                 object: serverObj,
@@ -72,9 +72,9 @@ class ParseSyncRepository<T extends ParseObject> {
 
   Future<void> _handleSuccessfulPush(SyncEntity<T> entity, T serverObject) async {
     if (entity.isDeleted) {
-      await _localDataSource.deleteEntity(entity.objectId);
+      await _localDataSource.delete(entity.objectId);
     } else {
-      await _localDataSource.putEntity(SyncEntity(
+      await _localDataSource.save(SyncEntity(
         objectId: serverObject.objectId!,
         object: serverObject,
         localUpdatedAt: DateTime.now(),
@@ -90,14 +90,14 @@ class ParseSyncRepository<T extends ParseObject> {
         remoteObject,
       );
 
-      await _localDataSource.putEntity(resolved);
+      await _localDataSource.save(resolved);
     }
   }
 
   Future<String> saveLocally(T object) {
     final objectId = object.objectId ?? 'CLIENT_${_uuid.v4()}';
     return _localDataSource
-        .putEntity(
+        .save(
           SyncEntity(
             objectId: objectId,
             object: object..objectId = objectId,

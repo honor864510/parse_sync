@@ -42,7 +42,7 @@ class SyncEntity<T extends ParseObject> {
   Map<String, dynamic> toMap() {
     return {
       keyVarObjectId: objectId,
-      'object': parseEncode(object),
+      'object': parseEncode(object, full: true),
       'isDirty': isDirty,
       'localUpdatedAt': localUpdatedAt.millisecondsSinceEpoch,
       'isDeleted': isDeleted,
