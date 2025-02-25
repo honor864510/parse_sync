@@ -1,11 +1,5 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
-import 'package:parse_sync/src/data_source/parse_sdk_data_source.dart';
-import 'package:parse_sync/src/data_source/sembast_data_source.dart';
-import 'package:parse_sync/src/data_source/sync_preferences.dart';
-import 'package:parse_sync/src/entity/sync_entity.dart';
-import 'package:parse_sync/src/utils/exceptions.dart';
-import 'package:parse_sync/src/utils/sync_conflict_handler.dart';
-import 'package:parse_sync/src/utils/sync_utils.dart';
+import 'package:parse_sync/parse_sync.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,5 +1,5 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
-import 'package:parse_sync/src/entity/sync_entity.dart';
+import 'package:parse_sync/parse_sync.dart';
 import 'package:sembast/sembast.dart';
 
 /// Manages local storage of synchronization entities using Sembast database.

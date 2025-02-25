@@ -1,6 +1,5 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
-import 'package:parse_sync/src/entity/sync_entity.dart';
-import 'package:parse_sync/src/utils/sync_utils.dart';
+import 'package:parse_sync/parse_sync.dart';
 
 /// Handles synchronization conflicts between local and server versions of
 /// a [ParseObject].
