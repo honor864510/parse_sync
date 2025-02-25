@@ -47,4 +47,7 @@ class SyncPreferences {
   ///
   /// Generated pattern: `lastSync_{collectionName}`
   String get _prefsKey => 'lastSync_$_collectionName';
+
+  /// Permanently deletes last sync date
+  Future<void> clear() async => _prefs.remove(_prefsKey);
 }

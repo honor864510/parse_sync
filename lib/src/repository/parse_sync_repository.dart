@@ -7,6 +7,7 @@ import 'package:parse_sync/src/utils/exceptions.dart';
 import 'package:parse_sync/src/utils/sync_conflict_handler.dart';
 import 'package:parse_sync/src/utils/sync_utils.dart';
 import 'package:sembast/sembast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Repository handling bidirectional synchronization between Parse server
 /// and local Sembast database.
@@ -32,23 +33,27 @@ class ParseSyncRepository<T extends ParseObject> {
     required ParseSdkDataSource<T> remoteDataSource,
     required SyncLocalDataSource<T> localDataSource,
     required SyncConflictHandler<T> conflictHandler,
-    required SyncPreferences syncPreferences,
     required ParseObjectConstructor objectConstructor,
+    required SharedPreferences preferences,
   })  : _objectConstructor = objectConstructor,
         _remoteDataSource = remoteDataSource,
         _localDataSource = localDataSource,
-        _conflictHandler = conflictHandler,
-        _syncPreferences = syncPreferences {
+        _conflictHandler = conflictHandler {
     assert(
       _objectConstructor() is T,
       'Object constructor is not a subtype of ${T.runtimeType}',
+    );
+
+    _syncPreferences = SyncPreferences(
+      prefs: preferences,
+      collectionName: objectConstructor().parseClassName,
     );
   }
 
   final ParseSdkDataSource<T> _remoteDataSource;
   final SyncLocalDataSource<T> _localDataSource;
   final SyncConflictHandler<T> _conflictHandler;
-  final SyncPreferences _syncPreferences;
+  late final SyncPreferences _syncPreferences;
   final ParseObjectConstructor _objectConstructor;
 
   /// Executes a full synchronization cycle between local and remote data stores
@@ -59,13 +64,18 @@ class ParseSyncRepository<T extends ParseObject> {
   /// 4. Updates last sync timestamp to current UTC time
   ///
   /// Throws [SyncException] if any critical sync operations fail
-  Future<void> sync() async {
+  Future<void> sync({
+    QueryBuilder<T>? serverQuery,
+  }) async {
     try {
       final lastSync = _syncPreferences.lastSync;
       final now = DateTime.now().toUtc();
 
       // Process server changes
-      final serverObjects = await _fetchServerChanges(lastSync);
+      final serverObjects = await _fetchServerChanges(
+        lastSync,
+        serverQuery: serverQuery,
+      );
       await _processServerObjects(serverObjects);
 
       // Process local changes
@@ -86,9 +96,28 @@ class ParseSyncRepository<T extends ParseObject> {
   /// [lastSync]: Timestamp of last successful sync
   /// (defaults to DateTime representing the Unix epoch (1970-01-01 UTC))
   /// Returns list of [T] objects modified since [lastSync]
-  Future<List<T>> _fetchServerChanges(DateTime lastSync) async {
-    final query = QueryBuilder<T>(_objectConstructor() as T);
-    return _remoteDataSource.fetchObjects(lastSync, query);
+  Future<List<T>> _fetchServerChanges(
+    DateTime lastSync, {
+    QueryBuilder<T>? serverQuery,
+  }) async {
+    const limit = 100;
+    var skip = 0;
+
+    final resultsList = <T>[];
+
+    while (true) {
+      final query = (serverQuery ?? QueryBuilder<T>(_objectConstructor() as T))
+        ..setLimit(limit)
+        ..setAmountToSkip(skip);
+
+      final results = await _remoteDataSource.fetchObjects(lastSync, query);
+      resultsList.addAll(results);
+
+      if (results.length < limit) break;
+      skip += limit;
+    }
+
+    return resultsList;
   }
 
   /// Processes server objects by merging with local changes
@@ -171,4 +200,46 @@ class ParseSyncRepository<T extends ParseObject> {
       await _localDataSource.save(newEntity);
     }
   }
+
+  /// Permanently deletes all entities from the local storage.
+  ///
+  /// Throws:
+  /// - [DatabaseException] if the operation fails
+  ///
+  Future<void> clear() async {
+    await _localDataSource.clear();
+    await _syncPreferences.clear();
+  }
+
+  /// Returns a continuous stream of parsed objects matching optional filters
+  ///
+  /// The stream will:
+  /// - Emit immediately with current data matching [finder] criteria
+  /// - Update automatically on local database changes
+  /// - Convert stored [SyncEntity] objects to their ParseObject equivalents
+  ///
+  /// Example:
+  /// ```dart
+  /// repository.watchAll(Finder(
+  ///   filter: Filter.greaterThan('age', 18),
+  ///   sortOrders: [SortOrder('name')]
+  /// )).listen((adults) => updateUI(adults));
+  /// ```
+  Stream<List<T>> watchAll([Finder? finder]) => _localDataSource
+          .watchAll(finder)
+          .map(
+            (entities) => entities
+                .map(
+                  (e) => e.object,
+                )
+                .whereType<T>()
+                .toList(),
+          )
+          .handleError(
+        (Object? error) {
+          throw SyncException(
+            message: 'Data observation failed: $error',
+          );
+        },
+      );
 }

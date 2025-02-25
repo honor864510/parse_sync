@@ -17,9 +17,7 @@ class ParseSdkDataSource<T extends ParseObject> {
   /// Parameters:
   /// [_objectConstructor] - A function that creates new instances of [T].
   /// This is used to generate new `ParseObject` instances of the type [T].
-  ParseSdkDataSource(
-    this._objectConstructor,
-  );
+  ParseSdkDataSource(this._objectConstructor);
 
   /// Constructor function that creates new instances of type [T]
   final ParseObjectConstructor _objectConstructor;
@@ -37,9 +35,7 @@ class ParseSdkDataSource<T extends ParseObject> {
   /// - `null` if no object exists with the given ID.
   ///
   Future<T?> fetchObject(String objectId) async {
-    final response = await _objectConstructor().getObject(
-      objectId,
-    );
+    final response = await _objectConstructor().getObject(objectId);
 
     final result = response.results?.firstOrNull as T?;
 
@@ -70,7 +66,10 @@ class ParseSdkDataSource<T extends ParseObject> {
 
     final response = await QueryBuilder.and(
       _objectConstructor(),
-      [query, querySync],
+      [
+        query,
+        querySync,
+      ],
     ).query();
 
     if (!response.success) {
