@@ -82,7 +82,7 @@ class ParseSyncRepository<T extends ParseObject> {
       final dirtyEntities = await _localDataSource.fetchAll(
         Finder(filter: Filter.equals('isDirty', true)),
       );
-      await _pushLocalChanges(dirtyEntities);
+      await pushLocalChanges(dirtyEntities);
 
       // Update last sync timestamp
       await _syncPreferences.setLastSync(now);
@@ -155,7 +155,7 @@ class ParseSyncRepository<T extends ParseObject> {
   ///
   /// [entities]: List of locally modified SyncEntity objects to synchronize
   /// Throws [ParseSdkException] if any entity fails to save remotely
-  Future<void> _pushLocalChanges(List<SyncEntity<T>> entities) async {
+  Future<void> pushLocalChanges(List<SyncEntity<T>> entities) async {
     for (final entity in entities) {
       final response = await _remoteDataSource.saveToServer(entity);
 
@@ -163,7 +163,7 @@ class ParseSyncRepository<T extends ParseObject> {
         throw ParseSdkException(error: response.error);
       }
 
-      await _handleSuccessfulPush(entity, response);
+      await handleSuccessfulPush(entity, response);
     }
   }
 
@@ -175,7 +175,7 @@ class ParseSyncRepository<T extends ParseObject> {
   ///
   /// [originalEntity]: Local entity before push operation
   /// [response]: Success response from Parse server
-  Future<void> _handleSuccessfulPush(
+  Future<void> handleSuccessfulPush(
     SyncEntity<T> originalEntity,
     ParseResponse response,
   ) async {
@@ -242,4 +242,22 @@ class ParseSyncRepository<T extends ParseObject> {
           );
         },
       );
+
+  /// Retrieves all entities from the local storage, optionally filtered.
+  ///
+  /// [finder]: Optional query conditions/sorting. See [Finder] documentation.
+  ///
+  /// Returns:
+  /// A list of parsed [T] objects matching the criteria.
+  ///
+  /// Throws:
+  /// - [SyncException] with details if data retrieval fails.
+  Future<List<T>> fetchAll([Finder? finder]) async {
+    try {
+      final entities = await _localDataSource.fetchAll(finder);
+      return entities.map((e) => e.object).whereType<T>().toList();
+    } catch (error) {
+      throw SyncException(message: 'Failed to fetch local data: $error');
+    }
+  }
 }
