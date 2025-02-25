@@ -6,7 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:parse_server_sdk/parse_server_sdk.dart';
 import 'package:parse_sync/src/data_source/parse_sdk_data_source.dart';
 import 'package:parse_sync/src/entity/sync_entity.dart';
-import 'package:parse_sync/src/utils/parse_sdk_exception.dart';
+import 'package:parse_sync/src/utils/exceptions.dart';
 
 import '../../utils/test_utils.dart';
 import 'parse_sdk_data_source_test.mocks.dart';

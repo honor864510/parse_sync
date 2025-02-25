@@ -1,5 +1,5 @@
 import 'package:parse_server_sdk/parse_server_sdk.dart';
-import 'package:parse_sync/src/entity/sync_entity.dart';
+import 'package:parse_sync/parse_sync.dart';
 import 'package:sembast/sembast.dart';
 
 /// Manages local storage of synchronization entities using Sembast database.
@@ -116,12 +116,11 @@ class SyncLocalDataSource<T extends ParseObject> {
     return record != null ? SyncEntity<T>.fromMap(record) : null;
   }
 
-  /// Clears all data from the local storage
-  ///
-  /// Removes all records from the underlying store.
+  /// Permanently deletes all entities from the local storage.
   ///
   /// Throws:
-  /// - [DatabaseException] if operation fails
+  /// - [DatabaseException] if the operation fails
+  ///
   Future<void> clear() async {
     await _store.delete(database);
   }

@@ -8,7 +8,7 @@ import 'package:parse_server_sdk/parse_server_sdk.dart';
 /// The `error` parameter can be a `ParseError` returned by the Parse SDK
 /// or `null` if no error is provided.
 ///
-class ParseSdkException extends Error {
+class ParseSdkException implements Exception {
   /// Constructs a `ParseSdkException` with the provided error.
   ///
   /// The [error] parameter is expected to be a `ParseError` or `null`.
@@ -30,4 +30,21 @@ class ParseSdkException extends Error {
     }
     return 'ParseSdkException: $error';
   }
+}
+
+/// Exception thrown when synchronization operations fail.
+///
+/// Contains a human-readable [message] describing the synchronization error
+/// that occurred during CRUD operations or conflict resolution.
+class SyncException implements Exception {
+  /// Creates a synchronization exception with the given error message.
+  ///
+  /// [message] should provide specific details about the sync failure context.
+  SyncException({required this.message});
+
+  /// Descriptive message explaining the synchronization failure
+  final String message;
+
+  @override
+  String toString() => 'SyncException: $message';
 }
